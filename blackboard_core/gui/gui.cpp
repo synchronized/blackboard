@@ -10,14 +10,14 @@
 #include "scene/components/uuid.h"
 #include "state/state.h"
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <entt/entity/runtime_view.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include <imgui/backends/imgui_impl_sdl.h>
-#include <imgui/imgui_internal.h>
-#include <imgui/misc/cpp/imgui_stdlib.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_internal.h>
+#include <imgui_stdlib.h>
 
 #include <iostream>
 

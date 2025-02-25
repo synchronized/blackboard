@@ -1,0 +1,14 @@
+{
+  "name": "blackboard",
+  "version": "1.0.0",
+  "dependencies": [
+    "assimp",
+    "bgfx",
+    "entt",
+    "glm",
+    "sdl2",
+    "sdl2-ttf",
+    "spdlog",
+    "stduuid"
+  ]
+}

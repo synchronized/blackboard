@@ -5,11 +5,12 @@
 #include "renderer/platform/imgui_impl_sdl_bgfx.h"
 #include "renderer/renderer.h"
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <bgfx/bgfx.h>
-#include <imgui/backends/imgui_impl_sdl.h>
-#include <imgui/imgui_internal.h>
-#include <imguizmo/imguizmo.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_internal.h>
+#include <ImGuizmo.h>
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 
@@ -20,7 +21,8 @@ App::App(const char *app_name, const renderer::Api renderer_api, const uint16_t 
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) != 0)
     {
-        std::cout << "Error: " << SDL_GetError() << std::endl;
+        spdlog::error("SDL_Init failed Error: {}", SDL_GetError());
+        return;
     }
 
     m_window.title = app_name;
@@ -28,7 +30,7 @@ App::App(const char *app_name, const renderer::Api renderer_api, const uint16_t 
     m_window.height = height;
     m_window.fullscreen = fullscreen;
 
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
+    //SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
     m_window.init_platform_window();
 
     gui::init();
@@ -36,11 +38,13 @@ App::App(const char *app_name, const renderer::Api renderer_api, const uint16_t 
     renderer::init(m_window, renderer_api, m_window.width, m_window.height);
     renderer::ImGui_Impl_sdl_bgfx_Init(m_window.imgui_view_id);
 
-    ImGui_ImplSDL2_InitForMetal(m_window.window);
+    ImGui_ImplSDL2_InitForOther((SDL_Window*)m_window.get_native_window());
+    spdlog::info("App create complete");
 }
 
 void App::run()
 {
+    spdlog::info("App.run start");
     on_init();
     auto layout_ui = resources::path() / "imgui.ini";
     if (!std::filesystem::exists(layout_ui))
@@ -50,18 +54,18 @@ void App::run()
     ImGui::LoadIniSettingsFromDisk(layout_ui.string().c_str());
     const auto [drawable_width, drawable_height] = m_window.get_size_in_pixels();
     on_resize(drawable_width, drawable_height);
-
+    SDL_Window* sdlwindow = (SDL_Window*)m_window.get_native_window();
     SDL_Event event;
     while (m_running)
     {
-        while (m_window.window != nullptr && SDL_PollEvent(&event))
+        while (sdlwindow && SDL_PollEvent(&event))
         {
             ImGui_ImplSDL2_ProcessEvent(&event);
 
             if (event.type == SDL_QUIT)
                 m_running = false;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
-                event.window.windowID == SDL_GetWindowID(m_window.window))
+                event.window.windowID == SDL_GetWindowID(sdlwindow))
                 m_running = false;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED)
             {
@@ -69,7 +73,7 @@ void App::run()
                 const auto height = event.window.data2;
                 m_window.width = width;
                 m_window.height = height;
-                renderer::ImGui_Impl_sdl_bgfx_Resize(m_window.window);
+                renderer::ImGui_Impl_sdl_bgfx_Resize(sdlwindow);
                 const auto [drawable_width, drawable_height] = m_window.get_size_in_pixels();
                 on_resize(drawable_width, drawable_height);
             }
@@ -94,6 +98,7 @@ void App::run()
 
         bgfx::frame();
     }
+    spdlog::info("app.run complete");
 }
 
 App::~App()
@@ -108,7 +113,7 @@ App::~App()
     ImGui::DestroyContext();
     bgfx::shutdown();
 
-    SDL_DestroyWindow(m_window.window);
+    m_window.destroy_platform_window();
     SDL_Quit();
 }
 }    // namespace blackboard::core

@@ -2,7 +2,7 @@
 #include "state/state.h"
 
 #include <glm/fwd.hpp>
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 #include <string>
 

@@ -8,3 +8,9 @@
 .clang-format
 
 /blackboard/.external
+
+build
+vcpkg_installed
+compile_commands.json
+CMakeSettings.json
+imgui.ini

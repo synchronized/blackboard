@@ -80,6 +80,41 @@ blackboard::core::resources::Mesh processMesh(aiMesh *ai_mesh, const aiScene *ai
     std::span<aiColor4D *> ai_colors{ai_mesh->mColors, ai_mesh->mNumVertices};
 
     // Vertices data
+    for (int i = 0; i < ai_mesh->mNumVertices; i++)
+    {
+        auto & v = ai_mesh->mVertices[i];
+        auto& n = ai_mesh->mNormals[i];
+        auto& t = ai_mesh->mTangents[i];
+        auto& bt = ai_mesh->mBitangents[i];
+        
+        auto& vertex = vertices.emplace_back();
+
+        vertex.position = glm::make_vec3(reinterpret_cast<float*>(&v));
+
+        if (ai_mesh->HasNormals())
+        {
+            vertex.normal = encode_to_rgba8(glm::make_vec3(reinterpret_cast<float*>(&n)));
+        }
+
+        if (ai_mesh->HasTextureCoords(0))
+        {
+            auto& tc = ai_mesh->mTextureCoords[0][i];
+            vertex.uvcoords = glm::make_vec3(reinterpret_cast<float*>(&tc));
+        }
+
+        if (ai_mesh->HasTangentsAndBitangents())
+        {
+            vertex.tangent = encode_to_rgba8(glm::make_vec3(reinterpret_cast<float*>(&t)));
+            vertex.bitangent = encode_to_rgba8(glm::make_vec3(reinterpret_cast<float*>(&bt)));
+        }
+
+        if (ai_mesh->HasVertexColors(0))
+        {
+            auto& c = ai_mesh->mColors[0][i];
+            vertex.color = encode_to_rgba8(glm::make_vec4(reinterpret_cast<float*>(&c)));
+        }
+    }
+    /*
     for (auto &&[v, n, t, bt, tc, c] :
          utils::zip(ai_vertices, ai_normals, ai_tangents, ai_bitangents, ai_texcoords, ai_colors))
     {
@@ -108,6 +143,7 @@ blackboard::core::resources::Mesh processMesh(aiMesh *ai_mesh, const aiScene *ai
             vertex.color = encode_to_rgba8(glm::make_vec4(reinterpret_cast<float *>(&c)));
         }
     }
+    */
 
     // Indices
     std::span<aiFace> ai_faces{ai_mesh->mFaces, ai_mesh->mNumFaces};
@@ -178,10 +214,10 @@ struct Model_loader
 
 entt::resource_cache<Model, Model_loader> models_cache;
     
-entt::id_type load_model(std::filesystem::path &&path)
+entt::id_type load_model(std::filesystem::path path)
 {
     const auto key = entt::hashed_string(core::components::Uuid().get().data());
-    if (models_cache.force_load(key, std::forward<std::filesystem::path>(path)).second)
+    if (models_cache.force_load(key, std::move(path)).second)
     {
         return key;
     }

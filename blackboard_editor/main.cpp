@@ -20,13 +20,16 @@
 #include <entt/entt.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
-#include <imguizmo/ImGuizmo.h>
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <ImGuizmo.h>
+#include <spdlog/spdlog.h>
 
 #include <filesystem>
 #include <iostream>
 #include <sstream>
+
+namespace fs = std::filesystem;
 
 using namespace blackboard;
 using namespace blackboard::core::renderer::layouts;
@@ -49,6 +52,10 @@ void init()
 
     core::gui::set_dracula_theme();
     const auto fonts_path = core::resources::path() / "assets/fonts";
+    if (!fs::exists(fonts_path)) {
+        spdlog::error("fonts_path not exists: {}", fonts_path.string());
+        return;
+    }
     core::gui::load_font(fonts_path / "Source_Sans_Pro/SourceSansPro-Regular.ttf", 15.0f, true);
     core::gui::load_font(fonts_path / "Roboto/Roboto-Regular.ttf", 14.0f);
     core::gui::load_font(fonts_path / "Dejavu-sans/DejaVuSans.ttf", 14.0f);
@@ -62,8 +69,12 @@ void init()
     auto e = state.create_entity();
     auto &tr_start = state.emplace_component<core::components::Transform>(e);
 
-    model_key =
-      core::resources::load_model(core::resources::path() / "assets/models/Sponza/glTF/Sponza.gltf");
+    auto model_path = core::resources::path() / "assets/models/Sponza/glTF/Sponza.gltf";
+    if (!fs::exists(model_path)) {
+        spdlog::error("model_path not exists: {}", model_path.string());
+        return;
+    }
+    model_key = core::resources::load_model(model_path);
 
     if (core::resources::is_valid_model_key(model_key))
     {
@@ -180,16 +191,16 @@ void app_update()
     uniform.u_time = core::App::elapsed_time();
 
     auto &state = core::get_state(state_name);
-
+    
     state.view<core::components::Transform, core::components::model_resource_key>().each(
       [&](const auto, const auto &transform, const auto &key) {
           bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z |
                          BGFX_STATE_DEPTH_TEST_LESS | /*BGFX_STATE_CULL_CCW |*/ BGFX_STATE_MSAA);
           auto prog =
             core::renderer::material_manager().material<core::renderer::material::UniformColor>();
-
+    
           core::renderer::material_manager().set_uniform(&uniform);
-
+    
           for (auto &&mesh : core::resources::get_model(key)->meshes)
           {
               bgfx::setVertexBuffer(0, mesh.vbh);
@@ -198,6 +209,7 @@ void app_update()
               bgfx::submit(5, prog->program_handle());
           }
       });
+
 
     render_ui();
 }
@@ -208,7 +220,12 @@ int main(int argc, char *argv[])
     if (argc > 1 && std::string(argv[1]) == headless_arg)
     {
         core::App app(headless_arg.c_str(), core::renderer::Api::none);
-        app.run();
+        try {
+            app.run();
+        }
+        catch (std::exception& e) {
+            spdlog::error("app.run failed: {}", e.what());
+        }
     }
     else
     {
@@ -216,7 +233,12 @@ int main(int argc, char *argv[])
         app.on_update = app_update;
         //        app.on_resize = resize;
         app.on_init = init;
-        app.run();
+        try {
+            app.run();
+        }
+        catch (std::exception& e) {
+            spdlog::error("app.run failed: {}", e.what());
+        }
     }
 
     return 0;

@@ -1,6 +1,6 @@
 #pragma once
 #include <bgfx/bgfx.h>
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 struct SDL_Window;
 
@@ -16,6 +16,6 @@ void ImGui_Impl_sdl_bgfx_Render(const bgfx::ViewId viewId, ImDrawData *draw_data
 void ImGui_Impl_sdl_bgfx_InvalidateDeviceObjects();
 bool ImGui_Impl_sdl_bgfx_CreateDeviceObjects();
 
-void *native_window_handle(void *window);
+void *native_window_handle(void *windowID);
 }    // namespace renderer
 }    // namespace blackboard::core

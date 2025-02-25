@@ -10,14 +10,14 @@
 #include <blackboard_core/scene/components/uuid.h>
 #include <blackboard_core/state/state.h>
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <entt/entity/runtime_view.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include <imgui/backends/imgui_impl_sdl.h>
-#include <imgui/imgui_internal.h>
-#include <imgui/misc/cpp/imgui_stdlib.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_internal.h>
+#include <imgui_stdlib.h>
 
 #include <iostream>
 
@@ -83,7 +83,7 @@ void reflection_inspector()
                 {
                     ImGui::TableNextColumn();
                     auto &&it = state.storage(type_index);
-                    const auto count = it->first == type_index ? it->second.size() : std::size_t(0u);
+                    const auto count = it ? it->size() : std::size_t(0u);
                     ImGui::Text("%lu", count);
                 }
             }

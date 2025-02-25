@@ -27,27 +27,29 @@ using Meta_infos = std::unordered_map<entt::id_type, Info>;
 
 inline constexpr auto property_name_key = entt::hashed_string("name");
 
-namespace impl {
+    namespace impl {
 
-template<typename T>
-inline std::pair<const entt::id_type, Info> create_meta(std::string &&reflected_name)
-{
-    entt::meta<T>()
-      .type(entt::hashed_string(reflected_name.c_str()))
-      .prop(property_name_key, reflected_name);
+    template<typename T>
+    inline std::pair<const entt::id_type, Info> create_meta(std::string &&reflected_name)
+    {
+        entt::meta<T>()
+          .type(entt::hashed_string(reflected_name.c_str()))
+          .prop(property_name_key, reflected_name);
 
-    const entt::type_info type_info = entt::type_id<T>();
-    return {type_info.hash(), {.name = reflected_name, .type_info = type_info}};
-}
+        const entt::type_info type_info = entt::type_id<T>();
+        return {type_info.hash(), Info{.name = reflected_name, .type_info = type_info}};
+    }
 
-inline Meta_infos meta_components_infos = {
-  meta::impl::create_meta<components::Uuid>("Uuid"),
-  meta::impl::create_meta<components::Name>("Name"),
-  meta::impl::create_meta<components::Transform>("Transform"),
-  meta::impl::create_meta<components::Animation>("Animation"),
-  meta::impl::create_meta<components::model_resource_key>("Model Resource Key"),
-  meta::impl::create_meta<components::Selected>("Selected")};
-}    // namespace impl
+    inline Meta_infos meta_components_infos = {
+        create_meta<components::Uuid>("Uuid"),
+        create_meta<components::Name>("Name"),
+        create_meta<components::Transform>("Transform"),
+        create_meta<components::Animation>("Animation"),
+        create_meta<components::model_resource_key>("Model Resource Key"),
+        create_meta<components::Selected>("Selected"),
+    };
+
+    }    // namespace impl
 
 template<typename T>
 inline void register_component(std::string &&reflected_name)

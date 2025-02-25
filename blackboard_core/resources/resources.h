@@ -5,7 +5,7 @@
 
 namespace blackboard::core::resources {
 
-entt::id_type load_model(std::filesystem::path &&path);
+entt::id_type load_model(std::filesystem::path path);
 
 std::shared_ptr<Model> get_model(const entt::id_type identifier);
 

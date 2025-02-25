@@ -4,7 +4,7 @@
 #include "platform/window.h"
 #include "renderer/renderer.h"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 #include <filesystem>
 #include <functional>

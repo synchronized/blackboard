@@ -3,14 +3,15 @@
 #include "fs_ocornut_imgui.bin.h"
 #include "vs_ocornut_imgui.bin.h"
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_syswm.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_syswm.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/embedded_shader.h>
 #include <bx/math.h>
 #include <bx/timer.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <spdlog/spdlog.h>
 
 #include <string>
 #include <vector>
@@ -62,9 +63,13 @@ enum class BgfxTextureFlags : uint32_t
     All = Opaque | PointSampler,
 };
 
-void *native_window_handle(void *window)
+void *native_window_handle(void *windowID)
 {
-    SDL_Window *sdl_window = (SDL_Window *)window;
+    SDL_Window *sdl_window = SDL_GetWindowFromID((Uint32)(intptr_t)windowID);
+    if (!sdl_window) {
+        spdlog::error("SDL_GetWindowFromID failed windowID:{}, err:{}", windowID, SDL_GetError());
+        return NULL;
+    }
     SDL_SysWMinfo wmi;
     SDL_VERSION(&wmi.version);
     if (!SDL_GetWindowWMInfo(sdl_window, &wmi))
@@ -113,7 +118,7 @@ static void ImguiBgfxOnCreateWindow(ImGuiViewport *viewport)
     data->height = bx::max<uint16_t>((uint16_t)viewport->Size.y, 1);
     // Create frame buffer
     data->frameBufferHandle =
-      bgfx::createFrameBuffer(native_window_handle((SDL_Window *)viewport->PlatformHandle),
+      bgfx::createFrameBuffer(native_window_handle(viewport->PlatformHandle),
                               data->width * viewport->DrawData->FramebufferScale.x,
                               data->height * viewport->DrawData->FramebufferScale.y);
     // Set frame buffer
@@ -240,7 +245,7 @@ void ImGui_Impl_sdl_bgfx_Render(const bgfx::ViewId view_id, ImDrawData *draw_dat
                 bgfx::ProgramHandle program = shader_handle;
 
                 auto alphaBlend = true;
-                if (cmd->TextureId != nullptr)
+                if (cmd->TextureId)
                 {
                     auto textureInfo = (uintptr_t)cmd->TextureId;
                     if (textureInfo & (uint32_t)BgfxTextureFlags::Opaque)
@@ -318,7 +323,7 @@ void ImGui_Implbgfx_CreateDeviceObjects()
                             bgfx::copy(pixels, width * height * 4));
     is_init = bgfx::isValid(font_texture);
     // Store our identifier
-    io.Fonts->TexID = (void *)(intptr_t)font_texture.idx;
+    io.Fonts->TexID = reinterpret_cast<ImTextureID>((void *)(intptr_t)font_texture.idx);
 }
 
 void ImGui_Implbgfx_InvalidateDeviceObjects()

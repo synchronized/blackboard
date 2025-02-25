@@ -1,6 +1,6 @@
 #pragma once
 #include <bgfx/bgfx.h>
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 #include <filesystem>
 #include <string>

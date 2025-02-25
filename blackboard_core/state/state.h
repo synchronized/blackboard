@@ -30,15 +30,15 @@ struct State
     }
 
     template<typename Component, typename... Other, typename... Exclude>
-    [[nodiscard]] decltype(auto) view(entt::exclude_t<Exclude...> args = {}) const
+    [[nodiscard]] decltype(auto) view(entt::exclude_t<Exclude...> = entt::exclude_t{}) const
     {
         return m_registry.view<Component, Other...>(std::forward<entt::exclude_t<Exclude...>>({}));
     }
 
     template<typename Component, typename... Other, typename... Exclude>
-    [[nodiscard]] decltype(auto) view(entt::exclude_t<Exclude...> args = {})
+    [[nodiscard]] decltype(auto) view(entt::exclude_t<Exclude...> = entt::exclude_t{})
     {
-        return m_registry.view<Component, Other...>(std::forward<entt::exclude_t<Exclude...>>({}));
+        return m_registry.view<Component, Other...>(entt::exclude_t<Exclude...>{});
     }
 
     template<typename... Args>
@@ -57,12 +57,6 @@ struct State
     decltype(auto) get(const entity_type entity) const
     {
         return m_registry.get<Args...>(entity);
-    }
-
-    template<typename Func>
-    void each(Func &&func) const
-    {
-        m_registry.each(std::forward<Func>(func));
     }
 
     decltype(auto) storage(const entt::id_type id) const
