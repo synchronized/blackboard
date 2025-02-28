@@ -72,6 +72,6 @@ void main()
         col = mix(edgeCol, vec3_splat(0.0), edge);
 //    }
 
-    gl_FragColor = lerp(u_color, u_edge_color, step(edge, 0.9));
+    gl_FragColor = mix(u_color, u_edge_color, step(edge, 0.9));
     gl_FragColor.rgb = abs(v_normal);
 }

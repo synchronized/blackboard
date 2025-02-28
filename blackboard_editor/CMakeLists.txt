@@ -21,6 +21,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
 
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR})
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    # Copy assets 
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets
+)
+
+
 # target_compile_definitions(${PROJECT_NAME} PRIVATE GLM_ENABLE_EXPERIMENTAL)
 
 # if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")

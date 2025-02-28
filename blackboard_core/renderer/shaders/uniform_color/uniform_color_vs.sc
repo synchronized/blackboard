@@ -10,7 +10,7 @@ void main()
 	v_texcoord0 = a_texcoord0;
 
 	gl_Position = mul(u_modelViewProj, vec4(a_position, 1.0) );
-    v_position = gl_Position;
+    v_position = vec3(gl_Position.xyz/gl_Position.w);
 
 	v_view = u_camera_position - mul(u_model[0], vec4(a_position, 1.0) ).xyz;
 	v_bc = a_color1;

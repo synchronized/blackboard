@@ -1,5 +1,5 @@
 #pragma once
-#include "material.h"
+#include "renderer/material/manager.h"
 
 #include <string>
 

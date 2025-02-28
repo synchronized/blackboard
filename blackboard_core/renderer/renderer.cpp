@@ -8,6 +8,7 @@
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <imgui_impl_sdl2.h>
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 
@@ -50,7 +51,10 @@ bool init(Window &window, const Api renderer_api, const uint16_t width, const ui
 
     bgfx_init.resolution.reset = BGFX_RESET_VSYNC | BGFX_RESET_HIDPI | BGFX_RESET_MSAA_X4;
     bgfx_init.platformData = pd;
-    bgfx::init(bgfx_init);
+    if (!bgfx::init(bgfx_init)) {
+        spdlog::error("bgfx::init failed");
+        return false; // 初始化失败
+    }
 
     bgfx::setDebug(BGFX_DEBUG_TEXT);
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000000FF, 1.0f, 0);

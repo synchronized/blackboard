@@ -11,7 +11,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
-#include(cmake/fetch_external_dependencies.cmake)
+# 设置可执行文件和dll文件的输出目录
+set(publish_bin_debug 			${CMAKE_CURRENT_SOURCE_DIR}/bin/debug)
+set(publish_bin_release 		${CMAKE_CURRENT_SOURCE_DIR}/bin/release)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${publish_bin_debug})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE 	${publish_bin_release})
 
 
 set(PROJECT_NAME blackboard)
@@ -28,13 +33,6 @@ include_directories(${PROJECT_SOURCE_DIR})
   # this is heuristically generated, and may not be correct
   find_package(assimp CONFIG REQUIRED)
   # target_link_libraries(main PRIVATE assimp::assimp)
-
-#bgfx provides CMake targets:
-
-  # this is heuristically generated, and may not be correct
-  find_package(bgfx CONFIG REQUIRED)
-  # note: 1 additional targets are not displayed.
-  # target_link_libraries(main PRIVATE bgfx::bx bgfx::bgfx bgfx::bimg bgfx::bimg_decode)
 
 #entt provides CMake targets:
 

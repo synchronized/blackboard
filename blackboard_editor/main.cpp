@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
     {
         core::App app("Example SDL", core::renderer::Api::count);    // autodetect renderer api
         app.on_update = app_update;
-        //        app.on_resize = resize;
+        app.on_resize = resize;
         app.on_init = init;
         try {
             app.run();

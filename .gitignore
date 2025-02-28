@@ -9,6 +9,7 @@
 
 /blackboard/.external
 
+bin
 build
 vcpkg_installed
 compile_commands.json

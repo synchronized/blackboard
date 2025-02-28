@@ -23,6 +23,30 @@ target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
 
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR})
 
+# compile shader
+set(blackboard_shader_directory "${CMAKE_CURRENT_SOURCE_DIR}/renderer/shaders/uniform_color")
+bgfx_compile_shaders(
+  TYPE VERTEX
+  SHADERS ${blackboard_shader_directory}/uniform_color_vs.sc
+  VARYING_DEF ${blackboard_shader_directory}/varying.def.sc
+  OUTPUT_DIR ${CMAKE_BINARY_DIR}/include/generated/shaders
+  AS_HEADERS
+)
+bgfx_compile_shaders(
+  TYPE FRAGMENT
+  SHADERS ${blackboard_shader_directory}/uniform_color_fs.sc
+  VARYING_DEF ${blackboard_shader_directory}/varying.def.sc
+  OUTPUT_DIR ${CMAKE_BINARY_DIR}/include/generated/shaders
+  AS_HEADERS
+)
+target_sources(
+    ${PROJECT_NAME} 
+    PRIVATE 
+        ${blackboard_shader_directory}/uniform_color_fs.sc
+        ${blackboard_shader_directory}/uniform_color_vs.sc
+)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/include/generated/shaders)
+
 # target_include_directories(${PROJECT_NAME}
 #                            PUBLIC
 #                            ${imgui_SOURCE_SYMLINK_DIR}

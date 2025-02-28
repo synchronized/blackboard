@@ -2,6 +2,9 @@
 
 #include <app/resources.h>
 
+#include <bx/platform.h>
+#include <spdlog/spdlog.h>
+
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -12,12 +15,17 @@ namespace {
 
 constexpr auto shader_bin_extension = ".bin";
 
-#ifdef __APPLE__
+#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+constexpr auto shader_platform_flags = " --platform linux";
+constexpr auto shader_fragment_program_flags = " -p metal";
+constexpr auto shader_vertex_program_flags = " -p metal";
+constexpr auto shaderc_binary = "tools/unix/shaderc";
+#elif BX_PLATFORM_OSX
 constexpr auto shader_platform_flags = " --platform osx";
 constexpr auto shader_fragment_program_flags = " -p metal";
 constexpr auto shader_vertex_program_flags = " -p metal";
 constexpr auto shaderc_binary = "tools/osx/shaderc";
-#elif _WIN32
+#elif BX_PLATFORM_WINDOWS
 constexpr auto shader_platform_flags = " --platform windows";
 constexpr auto shader_fragment_program_flags = " -p ps_5_0";
 constexpr auto shader_vertex_program_flags = " -p vs_5_0";
@@ -67,7 +75,11 @@ int compileShader(const std::filesystem::path &shaderFile,
         default:
             break;
     }
-    return system(cmd.c_str());
+    auto ret_code = system(cmd.c_str());
+    if (ret_code != 0) {
+        spdlog::error("execute cmd failed cmd: {}", cmd);
+    }
+    return ret_code;
 }
 
 }    // namespace
@@ -82,12 +94,14 @@ bool Program::init(const std::filesystem::path &vshPath, const std::filesystem::
     const auto fragErrorCode = compileShader(fshPath, Type::FRAGMENT);
     if (vertErrorCode != 0 || fragErrorCode != 0)
     {
+        spdlog::error("compileShader failed");
         return false;
     }
     const auto vsh = loadShader(vshPath.string() + shader_bin_extension);
     const auto fsh = loadShader(fshPath.string() + shader_bin_extension);
     if (!bgfx::isValid(vsh) && !bgfx::isValid(fsh))
     {
+        spdlog::error("loadShader failed");
         return false;
     }
     if (bgfx::isValid(m_program))
@@ -95,6 +109,17 @@ bool Program::init(const std::filesystem::path &vshPath, const std::filesystem::
     m_vsh = vsh;
     m_fsh = fsh;
     m_program = bgfx::createProgram(m_vsh, m_fsh, true);
+    if (!bgfx::isValid(m_program)) {
+        spdlog::error("createProgram failed");
+        return false;
+    }
+    return true;
+}
+
+bool Program::init(bgfx::ShaderHandle vsh, bgfx::ShaderHandle fsh, bgfx::ProgramHandle program) {
+    m_vsh = vsh;
+    m_fsh = fsh;
+    m_program = program;
     return true;
 }
 

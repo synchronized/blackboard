@@ -29,6 +29,7 @@ struct Program
     }
 
     bool init(const std::filesystem::path &vshPath, const std::filesystem::path &fshPath);
+    bool init(bgfx::ShaderHandle vsh, bgfx::ShaderHandle fsh, bgfx::ProgramHandle program);
 
     const bgfx::ProgramHandle program() const;
 
