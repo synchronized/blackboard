@@ -35,6 +35,9 @@ struct Manager
 {
     Manager()
     {
+        m_wd = std::make_unique<utils::Watchdog>();
+        m_wd->start();
+
         materials.emplace(entt::type_id<UniformColor>().hash(), std::make_shared<UniformColor>());
 
         for (auto &entry : materials)
@@ -44,8 +47,8 @@ struct Manager
                     entry.second->init();
                 };
                 const auto callback = [&entry](const std::filesystem::path &path) { entry.second->init(); };
-                utils::wd::watch(shader_path, callback);
-                utils::wd::watchMany(shader_path, callback_multi);
+                m_wd->watch(shader_path, callback);
+                m_wd->watchMany(shader_path, callback_multi);
             }
         }
     }
@@ -57,15 +60,23 @@ struct Manager
 
     inline void shutdown()
     {
+
+        if (bgfx::isValid(m_uniform_handle))
+        {
+            bgfx::destroy(m_uniform_handle);
+            m_uniform_handle = BGFX_INVALID_HANDLE;
+        }
+
         for (const auto &[name, material] : materials)
         {
             for (auto & shader_path : material->paths()) {
-                utils::wd::unwatch(shader_path);
+                m_wd->unwatch(shader_path);
             }
         }
-        utils::wd::unwatchAll();
 
         materials.clear();
+
+        m_wd->close();
     }
 
     template<typename T>
@@ -97,6 +108,8 @@ struct Manager
 
 private:
     bgfx::UniformHandle m_uniform_handle = BGFX_INVALID_HANDLE;
+
+    std::unique_ptr<utils::WatchdogI> m_wd;
 };
 }    // namespace material
 

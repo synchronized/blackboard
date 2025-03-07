@@ -113,6 +113,8 @@ bool Program::init(const std::filesystem::path &vshPath, const std::filesystem::
         spdlog::error("createProgram failed");
         return false;
     }
+    m_vsh = BGFX_INVALID_HANDLE;
+    m_fsh = BGFX_INVALID_HANDLE;
     return true;
 }
 

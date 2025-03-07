@@ -340,6 +340,11 @@ void ImGui_Implbgfx_InvalidateDeviceObjects()
         ImGui::GetIO().Fonts->TexID = 0;
         font_texture.idx = bgfx::kInvalidHandle;
     }
+
+    if (bgfx::isValid(uniform_texture))
+    {
+        bgfx::destroy(uniform_texture);
+    }
 }
 
 void ImGui_Impl_sdl_bgfx_Init(int view)

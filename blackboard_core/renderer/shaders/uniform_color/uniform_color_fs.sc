@@ -54,6 +54,7 @@ vec3 evalSh(vec3 _dir)
     return rgb;
 }
 
+/*
 void main()
 {
     vec3 nn = normalize(v_normal);
@@ -74,4 +75,13 @@ void main()
 
     gl_FragColor = mix(u_color, u_edge_color, step(edge, 0.9));
     gl_FragColor.rgb = abs(v_normal);
+}
+*/
+
+void main()
+{
+    vec3 nn = normalize(v_normal);
+
+    gl_FragColor.xyz = evalSh(nn);
+    gl_FragColor.w = 1.0;
 }

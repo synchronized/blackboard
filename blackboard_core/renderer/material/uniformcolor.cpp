@@ -39,6 +39,12 @@ UniformColor::UniformColor() {
     }
 
     auto program = bgfx::createProgram(vsh, fsh, true);
+    if (!bgfx::isValid(program)) {
+        spdlog::error("createProgram failed");
+        return;
+    }
+    vsh = BGFX_INVALID_HANDLE;
+    fsh = BGFX_INVALID_HANDLE;
     shader_prog.init(vsh, fsh, program);
 }
 
